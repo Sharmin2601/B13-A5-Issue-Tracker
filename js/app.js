@@ -8,6 +8,7 @@ async function loadIssues(status = 'all') {
     container.innerHTML = Array.from({ length: 8 }).map(() => `
         <div class="skeleton h-64 w-full rounded-xl"></div>
     `).join('');
+    
 
     try {
         const issues = await API.fetchAll();
@@ -45,23 +46,26 @@ function changeTab(status) {
 }
 
 
-function searchIssues() {
+async function searchIssues() {
     const searchInput = document.getElementById('searchInput');
     const query = searchInput.value.toLowerCase().trim();
     
-    const filtered = currentIssues.filter(i => {
-        const title = (i.title || "").toLowerCase();
-        const author = (i.author || "").toLowerCase();
-        const id = String(i.id || "");
-        const description = (i.description || "").toLowerCase();
+    if (!query) {
+        loadIssues(); // Re-loads the full list if user clears search
+        return;
+    }
 
-        return title.includes(query) || 
-               author.includes(query) || 
-               id.includes(query) || 
-               description.includes(query);
-    });
-        
-    renderIssues(filtered);
+    // Show skeletons while the API is thinking
+    const container = document.getElementById("issuesContainer");
+    container.innerHTML = `<div class="skeleton h-64 w-full rounded-xl"></div>`.repeat(4);
+
+    try {
+        const results = await API.search(query);
+        renderIssues(results);
+    } catch (error) {
+        console.error("Search failed:", error);
+        container.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Search service is currently unavailable.</div>`;
+    }
 }
 
 function renderIssues(issues) {
