@@ -84,7 +84,6 @@ function renderIssues(issues) {
     });
 }
 
-// ... Keep other functions (searchIssues, openIssueDetails, changeTab) same as before ...
 
 function searchIssues() {
     const query = document.getElementById('searchInput').value.toLowerCase().trim();
